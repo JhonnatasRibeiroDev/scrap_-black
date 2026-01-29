@@ -4,6 +4,9 @@ services:
     container_name: borde_backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./mitm/data:/data
+      - ./output:/output
     environment:
       - APP_ENV=dev
     networks:
@@ -32,14 +35,19 @@ services:
       - ./mitm/input:/input
     networks:
       - borde_net
-    command: >
-      sh -c "
-        mkdir -p /data &&
-        mitmweb --web-host 0.0.0.0 --web-port 8081 \
-                --listen-host 0.0.0.0 --listen-port 8080 \
-                --set confdir=/data \
-                -w /data/flows.mitm
-      "
+    command: /bin/sh -c "mkdir -p /data && mitmweb --listen-host 0.0.0.0 --listen-port 8080 --web-host 0.0.0.0 --web-port 8081 --set confdir=/data -w /data/flows.mitm"
+
+  mitm-converter:
+    build: ./mitm
+    container_name: borde_mitm_converter
+    volumes:
+      - ./mitm/data:/data
+      - ./mitm/capture.py:/app/capture.py
+    networks:
+      - borde_net
+    command: python3 /app/capture.py
+    depends_on:
+      - mitm
 
 networks:
   borde_net:
