@@ -1,0 +1,10 @@
+
+# mitmproxy data (generated at runtime)
+mitm/data/
+output/
+
+# Docker volumes
+*.mitm
+*.p12
+*.pem
+*.cer
